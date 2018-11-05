@@ -23,20 +23,32 @@ import stat
 #  2: directory name for build
 #  3: which build generator to use for cmake
 #  4: list of -D arguments to add to cmake
+#  5: if not None, then key to other project param to add a cmake
+#     define CMAKE_AVRLIBS_PATH with that project's build directory
 project_params = {
     'ahrs': [
         "avr",
         "ahrs",
         "build-ahrs-avr",
         "Ninja",
-        ["CMAKE_AVRLIBS_PATH=%s"],
+        [],
+        "avr_drivers-ahrs",
         ],
     'compass': [
         "avr",
         "compass",
         "build-compass-avr",
         "Ninja",
-        ["CMAKE_AVRLIBS_PATH=%s"],
+        [],
+        "avr_drivers-compass",
+        ],
+    'canbus-shield': [
+        "avr",
+        "canbus-shield",
+        "build-canbus-shield-avr",
+        "Ninja",
+        [],
+        "avr_drivers-canbus-shield",
         ],
     'avr_drivers-ahrs': [
         "avr",
@@ -44,6 +56,7 @@ project_params = {
         "build-avr_drivers-ahrs-avr",
         "Ninja",
         ["AHRS_FIRMWARE=ON"],
+        None,
         ],
     'avr_drivers-compass': [
         "avr",
@@ -51,6 +64,15 @@ project_params = {
         "build-avr_drivers-compass-avr",
         "Ninja",
         ["COMPASS_FIRMWARE=ON"],
+        None,
+        ],
+    'avr_drivers-canbus-shield': [
+        "avr",
+        "libs/avr_drivers",
+        "build-avr_drivers-canbus-shield-avr",
+        "Ninja",
+        ["CANBUS_SHIELD_FIRMWARE=ON"],
+        None,
         ],
     'libuavcan': [
         "linux-x86_64",
@@ -58,18 +80,26 @@ project_params = {
         "build-libuavcan-linux-x86_64",
         "Ninja",
         [],
+        None,
+        ],
+    'libuavcan-bbb': [
+        "linux-arm-gnueabihf",
+        "libs/libuavcan",
+        "build-libuavcan-linux-arm-gnueabihf",
+        "Unix Makefiles",
+        ["CMAKE_C_COMPILER:STRING=arm-linux-gnueabihf-gcc",
+        "CMAKE_CXX_COMPILER:STRING=arm-linux-gnueabihf-g++",],
+        None,
         ],
 }
 
-def finish_cmake_define_string(projname, rootdir, s):
-    # if an avr application firmware, replace the '%s' for
-    # CMAKE_AVRLIBS_PATH with appropriate path to avr_drivers
-    # libraries for that firmware build
-    if projname == 'ahrs' or projname == 'compass':
-        news = s % os.path.abspath(
-            os.path.join(rootdir,
-                         'build', 'build-avr_drivers-%s-avr' % projname))
-        s = news
+def finish_cmake_define_string(projname, rootdir, add_avr_lib_path, s):
+    """ if an avr application firmware, add an additional
+    cmake define 'CMAKE_AVRLIBS_PATH' with build path
+    from another project """
+    if add_avr_lib_path:
+        avr_build_path = construct_build_path(add_avr_lib_path, rootdir)
+        s += " -DCMAKE_AVRLIBS_PATH=" + avr_build_path
     return s
 
 def construct_cmake_args(deflist):
@@ -92,14 +122,45 @@ def execute_cmake(root_dir, proj_dir, generator_type, definestr):
     cmd = 'cmake -G "%s" %s %s' % (generator_type, definestr, proj_dir)
     print("Executing: " + cmd)
     return os.popen(cmd, 'r', True)
+
+def construct_build_path(param_key, root_dir):
+    return os.path.abspath(os.path.join(root_dir, 'build', project_params[param_key][2]))
+
+def show_projects():
+    keys = project_params.keys()
+    print("Project List")
+    [print("\t%s" % k) for k in sorted(keys)]
+    print
+
+def usage():
+        print(
+"""usage: 
+run-cmake.py [create|--create] root_dir project_name
+    Runs cmake for 'project_name' at firmware tree 'root_dir'
+run-cmake.py [list|--list]
+    Lists all projects
+run-cmake.py [help|--help]
+    Shows this help string
+""")
     
 def main(args):
-    if len(args) < 3:
-        print("usage: run-cmake.py root_dir project_name")
+    if len(args) < 2:
         sys.exit(-1)
-    root_dir = os.path.abspath(args[1])
-    projname = args[2]
-    proj_type, proj_dir, build_dir, gen_type, defines = project_params[projname]
+    if args[1] == 'list' or args[1] == '--list':
+        show_projects()
+        sys.exit(0)
+    elif args[1] == 'help' or args[1] == '--help':
+        usage()
+        sys.exit(0)
+    elif (args[1] == 'create' or args[1] == '--create') and len(args) != 4:
+        usage()
+        sys.exit(-1)
+    root_dir = os.path.abspath(args[2])
+    projname = args[3]
+    print("Project tree '%s'" % root_dir)
+    print("Running cmake for project '%s'" % projname)
+    
+    proj_type, proj_dir, build_dir, gen_type, defines, add_avr_lib_path = project_params[projname]
     if proj_type == 'avr':
         cmake_fn = execute_avr_cmake
     else:
@@ -117,7 +178,7 @@ def main(args):
     os.chdir(root_build)
 
     # create the project build directory
-    build_path = os.path.abspath(os.path.join(root_build, build_dir))
+    build_path = construct_build_path(projname, root_dir)
     if not os.path.exists(build_path):
         os.mkdir(build_dir)
         os.chmod(build_dir, stat.S_IRWXU|stat.S_IRWXG|stat.S_IROTH|stat.S_IXOTH)
@@ -125,8 +186,10 @@ def main(args):
     # now that all directories are built, do the rest
     if os.path.isdir(build_path):
         os.chdir(build_path)
-        print("build directory: " + build_path)
-        definestr = finish_cmake_define_string(projname, root_dir, construct_cmake_args(defines))
+        print("Build directory: " + build_path)
+        definestr = finish_cmake_define_string(projname, root_dir, add_avr_lib_path,
+                                               construct_cmake_args(defines))
+        print("Final cmake options:" + definestr)
         with cmake_fn(root_dir, proj_dir, gen_type, definestr) as output:
             print(output.read())
     else:
