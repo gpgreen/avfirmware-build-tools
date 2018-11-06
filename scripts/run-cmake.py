@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ######################################################################
 # run-cmake.py
@@ -145,6 +145,7 @@ run-cmake.py [help|--help]
     
 def main(args):
     if len(args) < 2:
+        usage()
         sys.exit(-1)
     if args[1] == 'list' or args[1] == '--list':
         show_projects()
