@@ -93,13 +93,15 @@ project_params = {
         ],
 }
 
-def finish_cmake_define_string(projname, rootdir, add_avr_lib_path, s):
+def finish_cmake_define_string(projname, rootdir, add_avr_lib_path, debug_build, s):
     """ if an avr application firmware, add an additional
     cmake define 'CMAKE_AVRLIBS_PATH' with build path
     from another project """
     if add_avr_lib_path:
         avr_build_path = construct_build_path(add_avr_lib_path, rootdir)
         s += " -DCMAKE_AVRLIBS_PATH=" + avr_build_path
+    if debug_build:
+        s += " -DCMAKE_BUILD_TYPE=Debug"
     return s
 
 def construct_cmake_args(deflist):
@@ -115,12 +117,12 @@ def execute_avr_cmake(root_dir, proj_dir, generator_type, definestr):
                      'build-tools/cmake-avr/generic-gcc-avr.cmake'))
     cmd = 'cmake -G "%s" -DCMAKE_TOOLCHAIN_FILE=%s %s %s' % (
         generator_type, build_chain_path, definestr, proj_dir)
-    print("Executing: " + cmd)
+    print("Executing:\n  " + cmd)
     return os.popen(cmd, 'r', True)
     
 def execute_cmake(root_dir, proj_dir, generator_type, definestr):
     cmd = 'cmake -G "%s" %s %s' % (generator_type, definestr, proj_dir)
-    print("Executing: " + cmd)
+    print("Executing:\n  " + cmd)
     return os.popen(cmd, 'r', True)
 
 def construct_build_path(param_key, root_dir):
@@ -135,15 +137,17 @@ def show_projects():
 def usage():
         print(
 """usage: 
-run-cmake.py [create|--create] root_dir project_name
+run-cmake.py create[--create] [debug|--debug] root_dir project_name
     Runs cmake for 'project_name' at firmware tree 'root_dir'
-run-cmake.py [list|--list]
+run-cmake.py list[--list]
     Lists all projects
-run-cmake.py [help|--help]
+run-cmake.py help[--help]
     Shows this help string
 """)
     
 def main(args):
+    root_dir_index = 2
+    debug_build = False
     if len(args) < 2:
         usage()
         sys.exit(-1)
@@ -153,11 +157,14 @@ def main(args):
     elif args[1] == 'help' or args[1] == '--help':
         usage()
         sys.exit(0)
-    elif (args[1] == 'create' or args[1] == '--create') and len(args) != 4:
+    elif (args[1] == 'create' or args[1] == '--create') and (len(args) < 4 or len(args) > 5):
         usage()
         sys.exit(-1)
-    root_dir = os.path.abspath(args[2])
-    projname = args[3]
+    if (args[1] == 'create' or args[1] == '--create') and (args[2] == 'debug' or args[2] == '--debug'):
+        root_dir_index = 3
+        debug_build = True
+    root_dir = os.path.abspath(args[root_dir_index])
+    projname = args[root_dir_index+1]
     print("Project tree '%s'" % root_dir)
     print("Running cmake for project '%s'" % projname)
     
@@ -189,8 +196,8 @@ def main(args):
         os.chdir(build_path)
         print("Build directory: " + build_path)
         definestr = finish_cmake_define_string(projname, root_dir, add_avr_lib_path,
-                                               construct_cmake_args(defines))
-        print("Final cmake options:" + definestr)
+                                                   debug_build, construct_cmake_args(defines))
+        #print("Final cmake options:" + definestr)
         with cmake_fn(root_dir, proj_dir, gen_type, definestr) as output:
             print(output.read())
     else:
