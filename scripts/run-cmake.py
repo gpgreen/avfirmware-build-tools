@@ -39,7 +39,7 @@ project_params = {
         "compass",
         "build-compass-avr",
         "Ninja",
-        [],
+        ["CMAKE_LIBCANARD_PATH=build-libcanard-drivers-avr-compass-avr"],
         "avr_drivers-compass",
         ],
     'canbus-shield': [
@@ -64,6 +64,14 @@ project_params = {
         "build-avr_drivers-compass-avr",
         "Ninja",
         ["COMPASS_FIRMWARE=ON"],
+        None,
+        ],
+    'libcanard-compass': [
+        "avr",
+        "libs/libcanard/drivers/avr",
+        "build-libcanard-drivers-avr-compass-avr",
+        "Ninja",
+        [],
         None,
         ],
     'avr_drivers-canbus-shield': [
