@@ -99,6 +99,22 @@ project_params = {
         "CMAKE_CXX_COMPILER:STRING=arm-linux-gnueabihf-g++",],
         None,
         ],
+    'pypilot-controller': [
+        "avr",
+        "pypilot-controller",
+        "build-pypilot-controller",
+        "Ninja",
+        [],
+        "avr_drivers-pypilot-controller",
+        ],
+    'avr_drivers-pypilot-controller': [
+        "avr",
+        "libs/avr_drivers",
+        "build-avr_drivers-pypilot-controller",
+        "Ninja",
+        ["PYPILOT_CONTROLLER_FIRMWARE=ON"],
+        None,
+        ],
 }
 
 def finish_cmake_define_string(projname, rootdir, add_avr_lib_path, debug_build, s):
