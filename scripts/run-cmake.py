@@ -115,6 +115,14 @@ project_params = {
         ["PYPILOT_CONTROLLER_FIRMWARE=ON"],
         None,
         ],
+    'libsimavr_parts': [
+        "linux-x86_64",
+        "libs/simavr_parts",
+        "build-libsimavr_parts-linux-x86_64",
+        "Ninja",
+        [],
+        None,
+        ],
 }
 
 def finish_cmake_define_string(projname, rootdir, add_avr_lib_path, debug_build, s):
