@@ -50,6 +50,14 @@ project_params = {
         [],
         "avr_drivers-canbus-shield",
         ],
+    'power-monitor': [
+        "avr",
+        "power-monitor",
+        "build-power-monitor-avr",
+        "Ninja",
+        [],
+        None,
+        ],
     'avr_drivers-ahrs': [
         "avr",
         "libs/avr_drivers",
