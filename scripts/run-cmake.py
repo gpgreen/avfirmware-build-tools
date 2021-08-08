@@ -55,7 +55,8 @@ project_params = {
         "libs/avr_drivers",
         "build-avr_drivers-ahrs-avr",
         "Ninja",
-        ["AHRS_FIRMWARE=ON"],
+        ["AHRS_FIRMWARE=ON",
+         "CANAERO=ON"],
         None,
         ],
     'avr_drivers-compass': [
@@ -79,7 +80,8 @@ project_params = {
         "libs/avr_drivers",
         "build-avr_drivers-canbus-shield-avr",
         "Ninja",
-        ["CANBUS_SHIELD_FIRMWARE=ON"],
+        ["CANBUS_SHIELD_FIRMWARE=ON",
+         "NMEA_2000=ON"],
         None,
         ],
     'libuavcan': [
@@ -112,7 +114,8 @@ project_params = {
         "libs/avr_drivers",
         "build-avr_drivers-pypilot-controller",
         "Ninja",
-        ["PYPILOT_CONTROLLER_FIRMWARE=ON"],
+        ["PYPILOT_CONTROLLER_FIRMWARE=ON",
+         "NMEA_2000=ON"],
         None,
         ],
     'libsimavr_parts': [
