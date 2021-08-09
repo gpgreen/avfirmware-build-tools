@@ -134,6 +134,14 @@ project_params = {
         [],
         None,
         ],
+    'power-monitor-bootloader': [
+        "avr",
+        "avr_bootloaders",
+        "build-power-monitor-bootloader-avr",
+        "Ninja",
+        ["POWER_MONITOR_BOOTLOADER=ON"],
+        None,
+        ],
 }
 
 def finish_cmake_define_string(projname, rootdir, add_avr_lib_path, debug_build, s):
