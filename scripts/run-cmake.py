@@ -136,10 +136,26 @@ project_params = {
         ],
     'power-monitor-bootloader': [
         "avr",
-        "avr_bootloaders",
+        "avr_bootloaders/bootloaders",
         "build-power-monitor-bootloader-avr",
         "Ninja",
         ["POWER_MONITOR_BOOTLOADER=ON"],
+        None,
+        ],
+    'power-monitor-breadboard-bootloader': [
+        "avr",
+        "avr_bootloaders/bootloaders",
+        "build-power-monitor-breadboard-bootloader-avr",
+        "Ninja",
+        ["NANO_PROTO_BOOTLOADER=ON"],
+        None,
+        ],
+    'power-monitor-bootloader-test': [
+        "linux-x86_64",
+        "avr_bootloaders/tst",
+        "build-power-monitor-bootloader-tst-linux-x86_64",
+        "Ninja",
+        [],
         None,
         ],
 }
