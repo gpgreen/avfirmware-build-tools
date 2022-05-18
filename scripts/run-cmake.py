@@ -158,6 +158,14 @@ project_params = {
         [],
         None,
         ],
+    'led-dimmer-boat-fw': [
+        "avr",
+        "led-dimmer-boat-fw",
+        "build-led-dimmer-boat-fw-avr",
+        "Ninja",
+        [],
+        None,
+        ],
 }
 
 def finish_cmake_define_string(projname, rootdir, add_avr_lib_path, debug_build, s):
@@ -186,7 +194,7 @@ def execute_avr_cmake(root_dir, proj_dir, generator_type, definestr):
         generator_type, build_chain_path, definestr, proj_dir)
     print("Executing:\n  " + cmd)
     return os.popen(cmd, 'r', True)
-    
+
 def execute_cmake(root_dir, proj_dir, generator_type, definestr):
     cmd = 'cmake -G "%s" %s %s' % (generator_type, definestr, proj_dir)
     print("Executing:\n  " + cmd)
@@ -203,7 +211,7 @@ def show_projects():
 
 def usage():
         print(
-"""usage: 
+"""usage:
 run-cmake.py create[--create] [debug|--debug] root_dir project_name
     Runs cmake for 'project_name' at firmware tree 'root_dir'
 run-cmake.py list[--list]
@@ -211,7 +219,7 @@ run-cmake.py list[--list]
 run-cmake.py help[--help]
     Shows this help string
 """)
-    
+
 def main(args):
     root_dir_index = 2
     debug_build = False
@@ -234,7 +242,7 @@ def main(args):
     projname = args[root_dir_index+1]
     print("Project tree '%s'" % root_dir)
     print("Running cmake for project '%s'" % projname)
-    
+
     proj_type, proj_dir, build_dir, gen_type, defines, add_avr_lib_path = project_params[projname]
     if proj_type == 'avr':
         cmake_fn = execute_avr_cmake
@@ -243,7 +251,7 @@ def main(args):
 
     # path to proj
     proj_dir = os.path.abspath(os.path.join(root_dir, proj_dir))
-        
+
     # create the build directory under root directory
     os.chdir(root_dir)
     root_build = os.path.abspath(os.path.join(root_dir, 'build'))
@@ -269,6 +277,6 @@ def main(args):
             print(output.read())
     else:
         raise RuntimeError("build path '%s' exists but is not a directory" % build_path)
-    
+
 if __name__ == "__main__":
     main(sys.argv)
