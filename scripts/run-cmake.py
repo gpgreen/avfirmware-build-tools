@@ -163,7 +163,15 @@ project_params = {
         "led-dimmer-boat-fw",
         "build-led-dimmer-boat-fw-avr",
         "Ninja",
-        [],
+        ["AVR_USE_MIN_PRINTF=OFF"],
+        None,
+        ],
+    'led-dimmer-boat-fw-proto': [
+        "avr",
+        "led-dimmer-boat-fw",
+        "build-led-dimmer-boat-fw-proto-avr",
+        "Ninja",
+        ["PROTO=ON", "AVR_USE_MIN_PRINTF=OFF"],
         None,
         ],
 }
