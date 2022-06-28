@@ -150,6 +150,14 @@ project_params = {
         ["NANO_PROTO_BOOTLOADER=ON"],
         None,
         ],
+    'power-monitor-breadboard': [
+        "avr",
+        "power-monitor",
+        "build-power-monitor-breadboard-avr",
+        "Ninja",
+        ["PROTOTYPE=ON"],
+        None,
+        ],
     'power-monitor-bootloader-test': [
         "linux-x86_64",
         "avr_bootloaders/tst",
